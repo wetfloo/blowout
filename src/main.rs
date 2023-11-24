@@ -1,11 +1,11 @@
 use clap::Parser;
 use input::{Args, InputError};
-use regex::get_regex;
 use unit::MeasurementUnit;
 
 mod input;
 mod regex;
 mod unit;
+mod speed;
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
@@ -13,8 +13,7 @@ fn main() -> anyhow::Result<()> {
         .unit
         .ok_or_else(|| InputError::NoInput)
         .and_then(|s| s.try_into())?;
-
-    let _regex = get_regex(unit)?;
+    let _speed = speed::get_speed(unit, todo!())?;
 
     Ok(())
 }

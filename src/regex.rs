@@ -13,5 +13,6 @@ pub fn get_regex(unit: &MeasurementUnit) -> anyhow::Result<&'static Regex> {
     let mut buf = REGEX_STR.to_string();
     buf.push_str(unit.clone().value().as_str());
     let regex: Regex = buf.try_into()?;
+
     Ok(REGEX.get_or_init(|| regex))
 }

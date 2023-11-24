@@ -6,7 +6,7 @@ use clap::Parser;
 pub struct Args {
     pub filepath: PathBuf,
     #[arg(short, long, value_name = "unit")]
-    pub unit: Option<String>,
+    pub unit: String,
     #[arg(short, long, value_name = "separator")]
     pub separator: Option<String>,
 }

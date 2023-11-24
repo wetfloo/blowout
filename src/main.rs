@@ -14,7 +14,7 @@ mod unit;
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let file = File::open("input.txt")?;
+    let file = File::open(&args.filepath)?;
     let reader = BufReader::new(file);
 
     let unit = args.unit.try_into()?;

@@ -1,7 +1,10 @@
+use std::path::PathBuf;
+
 use clap::Parser;
 
 #[derive(Parser)]
 pub struct Args {
+    pub filepath: PathBuf,
     #[arg(short, long, value_name = "unit")]
     pub unit: Option<String>,
     #[arg(short, long, value_name = "separator")]

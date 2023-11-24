@@ -2,8 +2,8 @@ use std::{num::ParseFloatError, str::FromStr};
 
 use crate::{regex::get_regex, unit::MeasurementUnit};
 
-pub fn get_speed(unit: MeasurementUnit, input: &str) -> anyhow::Result<Speed> {
-    let regex = get_regex(unit)?;
+pub fn get_speed(unit: &MeasurementUnit, input: &str) -> anyhow::Result<Speed> {
+    let regex = get_regex(&unit)?;
     let capture = regex
         .captures(input)
         .ok_or_else(|| InvalidInput::Malformed)?

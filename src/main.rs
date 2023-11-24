@@ -20,8 +20,9 @@ fn main() -> anyhow::Result<()> {
     let unit = args.unit.try_into()?;
     let _speeds: Vec<_> = reader
         .lines()
-        .map(|line| speed::get_speed(&unit, line?.as_str()))
-        .collect::<Result<_, _>>()?;
+        .map(|line_res| speed::get_speed(&unit, &line_res?))
+        .filter_map(|speed_res| speed_res.ok())
+        .collect();
 
     Ok(())
 }

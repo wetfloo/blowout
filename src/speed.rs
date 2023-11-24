@@ -41,4 +41,3 @@ pub enum InvalidInput {
     #[error("malformed input, couldn't parse anything")]
     Malformed,
 }
-

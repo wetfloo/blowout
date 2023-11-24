@@ -1,4 +1,4 @@
-use crate::{input::InputError, regex::UNITS_REGEX};
+use crate::{cli::InputError, regex::UNITS_REGEX};
 
 type MeasurementUnitValue = String;
 

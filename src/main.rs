@@ -4,9 +4,9 @@ use std::{
 };
 
 use clap::Parser;
-use input::Args;
+use cli::Args;
 
-mod input;
+mod cli;
 mod regex;
 mod speed;
 mod unit;

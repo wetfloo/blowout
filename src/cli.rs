@@ -5,6 +5,8 @@ use clap::Parser;
 #[derive(Parser)]
 pub struct Args {
     pub filepath: PathBuf,
+    #[arg(short, long, value_name = "duration")]
+    pub duration_seconds: u64,
     #[arg(short, long, value_name = "unit")]
     pub unit: String,
     #[arg(short, long, value_name = "separator")]

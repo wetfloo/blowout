@@ -39,15 +39,13 @@ fn main() -> anyhow::Result<()> {
         return Err(NoValues.into());
     }
 
-    let pieces = vec![AudioPiece {
-            frequency: 40,
-            amplitude: 1000.0,
-            duration: Duration::from_secs(10),
-        }];
-    let audio_spec = audio::AudioSpec::new(
-        &Path::new("output.wav"),
-    );
-    audio::make_audio(&pieces, &audio_spec)?;
+    let iter = (20..500).filter(|x| x % 10 == 0).map(|x| AudioPiece {
+        frequency: x,
+        amplitude: 0.9,
+        duration: Duration::from_millis(1000),
+    });
+    let audio_spec = audio::AudioSpec::new(&Path::new("output.wav"));
+    audio::make_audio(iter, &audio_spec)?;
 
     Ok(())
 }

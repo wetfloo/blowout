@@ -5,6 +5,7 @@ use std::{
     time::Duration,
 };
 
+use audio::AudioPiece;
 use clap::Parser;
 use cli::Args;
 
@@ -38,11 +39,15 @@ fn main() -> anyhow::Result<()> {
         return Err(NoValues.into());
     }
 
+    let pieces = vec![AudioPiece {
+            frequency: 40,
+            amplitude: 1000.0,
+            duration: Duration::from_secs(10),
+        }];
     let audio_spec = audio::AudioSpec::new(
         &Path::new("output.wav"),
-        Duration::from_secs(args.duration_seconds),
     );
-    audio::make_audio(&speeds, &audio_spec)?;
+    audio::make_audio(&pieces, &audio_spec)?;
 
     Ok(())
 }

@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use audio::PieceDuration;
+use audio::TemporalPiece;
 use clap::Parser;
 use cli::Args;
 
@@ -45,7 +45,7 @@ fn main() -> anyhow::Result<()> {
             amplitude: 0.9,
         });
         let duration = Duration::from_millis(1000);
-        PieceDuration(piece, duration)
+        TemporalPiece(piece, duration)
     });
     let audio_spec = audio::AudioSpec::new(&Path::new("output.wav"));
     audio::make_audio(iter, &audio_spec)?;

@@ -8,7 +8,7 @@ use hound::{SampleFormat, WavSpec, WavWriter};
 use self::piece::WriteAudio;
 pub use self::piece::{Fade, Static};
 
-pub struct PieceDuration(pub Piece, pub Duration);
+pub struct TemporalPiece(pub Piece, pub Duration);
 
 trait SampleCount {
     fn sample_count(&self, sample_rate: u32) -> u64;
@@ -28,15 +28,15 @@ pub enum Piece {
     Fadeout(Fade),
 }
 
-pub fn make_audio<Pieces>(pieces: Pieces, spec: &AudioSpec) -> anyhow::Result<()>
+pub fn make_audio<Temporals>(temporals: Temporals, spec: &AudioSpec) -> anyhow::Result<()>
 where
-    Pieces: IntoIterator<Item = PieceDuration>,
+    Temporals: IntoIterator<Item = TemporalPiece>,
 {
     let mut writer = WavWriter::create(spec.file_path, spec.wav_spec)?;
     let sample_rate = spec.wav_spec.sample_rate;
 
-    for piece_duration in pieces {
-        let PieceDuration(piece, duration) = piece_duration;
+    for temporal in temporals {
+        let TemporalPiece(piece, duration) = temporal;
         let sample_count = duration.sample_count(sample_rate);
 
         match piece {

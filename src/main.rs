@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use audio::{AudioPiece, Fadeout};
+
 use clap::Parser;
 use cli::Args;
 
@@ -41,12 +41,12 @@ fn main() -> anyhow::Result<()> {
 
     let iter = (20..500)
         .filter(|x| x % 10 == 0)
-        .map(|x| x as f32)
-        .map(|x| AudioPiece {
-            frequency: x,
-            amplitude: 0.9,
-            duration: Duration::from_millis(1000),
-            fadeout: Fadeout::default(),
+        .map(|freq| {
+            audio::Piece::Static(audio::Static {
+                frequency: freq as f32,
+                amplitude: 0.9,
+                duration: Duration::from_millis(1000),
+            })
         });
     let audio_spec = audio::AudioSpec::new(&Path::new("output.wav"));
     audio::make_audio(iter, &audio_spec)?;

@@ -9,28 +9,12 @@ pub(super) trait Writeable: Seek + Write {}
 
 impl<T> Writeable for T where T: Seek + Write {}
 
-trait SampleCount {
-    fn sample_count(&self, sample_rate: u32) -> u64;
-}
-
-trait DurationSecsF64 {
-    fn duration(&self) -> f64;
-}
-
-impl<T: DurationSecsF64> SampleCount for T {
-    fn sample_count(&self, sample_rate: u32) -> u64 {
-        let duration_secs = self.duration();
-        let unrounded = sample_rate as f64 * duration_secs;
-
-        unrounded.round() as u64
-    }
-}
-
 pub(super) trait WriteAudio {
     fn write<W: Writeable>(
         &self,
         writer: &mut WavWriter<W>,
         sample_rate: u32,
+        sample_count: u64,
     ) -> anyhow::Result<()>;
 }
 
@@ -42,7 +26,6 @@ pub(super) trait WriteAudio {
 pub struct Static {
     pub frequency: f32,
     pub amplitude: f32,
-    pub duration: time::Duration,
 }
 
 impl WriteAudio for Static {
@@ -50,10 +33,9 @@ impl WriteAudio for Static {
         &self,
         writer: &mut WavWriter<W>,
         sample_rate: u32,
+        sample_count: u64,
     ) -> anyhow::Result<()>
 where {
-        let sample_count = self.sample_count(sample_rate);
-
         let coefficient_iter = (0..sample_count).map(|x| x as f32 / sample_rate as f32);
         for coefficient in coefficient_iter {
             let base_value = (2.0 * PI * coefficient * self.frequency).cos();
@@ -63,12 +45,6 @@ where {
         }
 
         Ok(())
-    }
-}
-
-impl DurationSecsF64 for Static {
-    fn duration(&self) -> f64 {
-        self.duration.as_secs_f64()
     }
 }
 
@@ -85,8 +61,8 @@ impl WriteAudio for Fade {
         &self,
         writer: &mut WavWriter<W>,
         sample_rate: u32,
+        sample_count: u64,
     ) -> anyhow::Result<()> {
-        let sample_count = self.sample_count(sample_rate);
         let end_amplitude = self.end_amplitude;
         let fraction = end_amplitude / sample_count as f32;
 
@@ -111,11 +87,5 @@ impl WriteAudio for Fade {
         }
 
         Ok(())
-    }
-}
-
-impl DurationSecsF64 for Fade {
-    fn duration(&self) -> f64 {
-        self.duration.as_secs_f64()
     }
 }

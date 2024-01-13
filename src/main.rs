@@ -5,6 +5,7 @@ use std::{
     time::Duration,
 };
 
+use audio::PieceDuration;
 use clap::Parser;
 use cli::Args;
 
@@ -39,11 +40,12 @@ fn main() -> anyhow::Result<()> {
     }
 
     let iter = (20..500).filter(|x| x % 10 == 0).map(|freq| {
-        audio::Piece::Static(audio::Static {
+        let piece = audio::Piece::Static(audio::Static {
             frequency: freq as f32,
             amplitude: 0.9,
-            duration: Duration::from_millis(1000),
-        })
+        });
+        let duration = Duration::from_millis(1000);
+        PieceDuration(piece, duration)
     });
     let audio_spec = audio::AudioSpec::new(&Path::new("output.wav"));
     audio::make_audio(iter, &audio_spec)?;

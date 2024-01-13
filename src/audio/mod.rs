@@ -1,12 +1,27 @@
 pub mod piece;
 
-use std::path::Path;
+use std::{path::Path, time::Duration};
 
 use anyhow;
 use hound::{SampleFormat, WavSpec, WavWriter};
 
 use self::piece::WriteAudio;
 pub use self::piece::{Fade, Static};
+
+pub struct PieceDuration(pub Piece, pub Duration);
+
+trait SampleCount {
+    fn sample_count(&self, sample_rate: u32) -> u64;
+}
+
+impl SampleCount for Duration {
+    fn sample_count(&self, sample_rate: u32) -> u64 {
+        let duration_secs = self.as_secs_f64();
+        let unrounded = sample_rate as f64 * duration_secs;
+
+        unrounded.round() as u64
+    }
+}
 
 pub enum Piece {
     Static(Static),
@@ -15,15 +30,18 @@ pub enum Piece {
 
 pub fn make_audio<Pieces>(pieces: Pieces, spec: &AudioSpec) -> anyhow::Result<()>
 where
-    Pieces: IntoIterator<Item = Piece>,
+    Pieces: IntoIterator<Item = PieceDuration>,
 {
     let mut writer = WavWriter::create(spec.file_path, spec.wav_spec)?;
     let sample_rate = spec.wav_spec.sample_rate;
 
-    for piece in pieces {
+    for piece_duration in pieces {
+        let PieceDuration(piece, duration) = piece_duration;
+        let sample_count = duration.sample_count(sample_rate);
+
         match piece {
-            Piece::Static(p) => p.write(&mut writer, sample_rate)?,
-            Piece::Fadeout(p) => p.write(&mut writer, sample_rate)?,
+            Piece::Static(p) => p.write(&mut writer, sample_rate, sample_count)?,
+            Piece::Fadeout(p) => p.write(&mut writer, sample_rate, sample_count)?,
         }
     }
 

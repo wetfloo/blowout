@@ -5,7 +5,7 @@ use std::time;
 use anyhow;
 use hound::WavWriter;
 
-pub trait Writeable: Seek + Write {}
+pub(super) trait Writeable: Seek + Write {}
 
 impl<T> Writeable for T where T: Seek + Write {}
 

@@ -5,6 +5,10 @@ use std::time;
 use anyhow;
 use hound::WavWriter;
 
+pub trait Writeable: Seek + Write {}
+
+impl<T> Writeable for T where T: Seek + Write {}
+
 trait SampleCount {
     fn sample_count(&self, sample_rate: u32) -> u64;
 }
@@ -23,9 +27,11 @@ impl<T: DurationSecsF64> SampleCount for T {
 }
 
 pub(super) trait WriteAudio {
-    fn write<W>(&self, writer: &mut WavWriter<W>, sample_rate: u32) -> anyhow::Result<()>
-    where
-        W: Seek + Write;
+    fn write<W: Writeable>(
+        &self,
+        writer: &mut WavWriter<W>,
+        sample_rate: u32,
+    ) -> anyhow::Result<()>;
 }
 
 /// Represents a small portion of an audio file that doesn't really change in amplitude during its
@@ -40,10 +46,12 @@ pub struct Static {
 }
 
 impl WriteAudio for Static {
-    fn write<W>(&self, writer: &mut WavWriter<W>, sample_rate: u32) -> anyhow::Result<()>
-    where
-        W: Seek + Write,
-    {
+    fn write<W: Writeable>(
+        &self,
+        writer: &mut WavWriter<W>,
+        sample_rate: u32,
+    ) -> anyhow::Result<()>
+where {
         let sample_count = self.sample_count(sample_rate);
 
         let coefficient_iter = (0..sample_count).map(|x| x as f32 / sample_rate as f32);
@@ -73,10 +81,11 @@ pub struct Fade {
 }
 
 impl WriteAudio for Fade {
-    fn write<W>(&self, writer: &mut WavWriter<W>, sample_rate: u32) -> anyhow::Result<()>
-    where
-        W: Seek + Write,
-    {
+    fn write<W: Writeable>(
+        &self,
+        writer: &mut WavWriter<W>,
+        sample_rate: u32,
+    ) -> anyhow::Result<()> {
         let sample_count = self.sample_count(sample_rate);
         let end_amplitude = self.end_amplitude;
         let fraction = end_amplitude / sample_count as f32;

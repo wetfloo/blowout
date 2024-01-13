@@ -20,5 +20,3 @@ pub enum InputError {
     #[error("no measurement unit is provided")]
     NoInput,
 }
-
-

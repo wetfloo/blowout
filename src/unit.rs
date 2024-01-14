@@ -3,13 +3,7 @@ use crate::{cli::InputError, regex::UNITS_REGEX};
 type MeasurementUnitValue = String;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct MeasurementUnit(MeasurementUnitValue);
-
-impl MeasurementUnit {
-    pub fn value(self) -> MeasurementUnitValue {
-        self.0
-    }
-}
+pub struct MeasurementUnit(pub MeasurementUnitValue);
 
 impl TryFrom<String> for MeasurementUnit {
     type Error = InputError;

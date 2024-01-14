@@ -1,18 +1,28 @@
 use std::{num::ParseFloatError, str::FromStr};
 
-use crate::{regex::get_regex, unit::MeasurementUnit};
+use nom::bytes::streaming::tag;
+use nom::character::streaming::{anychar, space0};
 
-pub fn get_speed(unit: &MeasurementUnit, input: &str) -> anyhow::Result<Speed> {
-    let regex = get_regex(&unit)?;
-    let capture = regex
-        .captures(input)
-        .ok_or_else(|| InvalidInput::Malformed)?
-        .iter()
-        .skip(1)
-        .find_map(|mtch| mtch.map(|m| m.as_str()))
-        .ok_or_else(|| InvalidInput::NoSpeed)?;
+use nom::multi::many_till;
+use nom::number::streaming::float;
+use nom::sequence::tuple;
+use nom::{sequence::terminated, IResult};
 
-    Ok(capture.parse()?)
+use crate::unit::MeasurementUnit;
+
+// TODO: figure out how to not take input as a allocated string.
+pub fn get_speed(
+    input: String,
+    MeasurementUnit(unit_string): &MeasurementUnit,
+) -> anyhow::Result<Speed> {
+    let mut cls = many_till(
+        anychar,
+        terminated(float, tuple((space0, tag(unit_string.as_str())))),
+    );
+    let parse_result: IResult<&str, _, ()> = cls(input.as_str());
+    let (_, (_, x)) = parse_result?;
+
+    Ok(Speed(x))
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -8,6 +8,7 @@ use std::{
 use audio::{Piece, Static, TemporalPiece};
 use clap::Parser;
 use cli::Args;
+use speed::Speed;
 
 mod audio;
 mod cli;
@@ -32,8 +33,8 @@ fn main() -> anyhow::Result<()> {
             Ok(line_res) => !line_res.trim().is_empty(),
             Err(_) => true,
         })
-        .map(|line_res| speed::get_speed(&unit, &line_res?))
-        .filter_map(|speed_res| speed_res.ok())
+        .filter_map(|line_res| line_res.ok().and_then(|v| speed::get_speed(v, &unit).ok()))
+        .map(|Speed(speed)| speed)
         .collect();
     if speeds.is_empty() {
         return Err(NoValues.into());
@@ -42,7 +43,7 @@ fn main() -> anyhow::Result<()> {
     let duration = Duration::from_millis(args.sample_duration_ms);
     let sounds: Vec<_> = speeds
         .iter()
-        .map(|speed| speed.0 * frequency_mulitplier)
+        .map(|speed| speed * frequency_mulitplier)
         .map(|freq| {
             Piece::Static(Static {
                 frequency: freq,

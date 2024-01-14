@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use audio::TemporalPiece;
+use audio::{Piece, Static, TemporalPiece};
 use clap::Parser;
 use cli::Args;
 
@@ -38,17 +38,27 @@ fn main() -> anyhow::Result<()> {
     if speeds.is_empty() {
         return Err(NoValues.into());
     }
+    let frequency_mulitplier = args.frequency_multiplier;
+    let duration = Duration::from_millis(args.sample_duration_ms);
+    let sounds: Vec<_> = speeds
+        .iter()
+        .map(|speed| speed.0 * frequency_mulitplier)
+        .map(|freq| {
+            Piece::Static(Static {
+                frequency: freq,
+                amplitude: 0.9,
+            })
+        })
+        .map(|piece| TemporalPiece(piece, duration))
+        .collect();
 
-    let iter = (20..500).filter(|x| x % 10 == 0).map(|freq| {
-        let piece = audio::Piece::Static(audio::Static {
-            frequency: freq as f32,
-            amplitude: 0.9,
-        });
-        let duration = Duration::from_millis(1000);
-        TemporalPiece(piece, duration)
-    });
     let audio_spec = audio::AudioSpec::new(&Path::new("output.wav"));
+    let iter = sounds.into_iter();
     audio::make_audio(iter, &audio_spec)?;
 
     Ok(())
+}
+
+trait LinesLossy {
+    fn lines_lossy() -> anyhow::Result<()>;
 }

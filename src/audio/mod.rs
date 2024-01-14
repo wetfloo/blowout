@@ -8,6 +8,7 @@ use hound::{SampleFormat, WavSpec, WavWriter};
 use self::piece::WriteAudio;
 pub use self::piece::{Fade, Static};
 
+#[derive(Clone, Debug)]
 pub struct TemporalPiece(pub Piece, pub Duration);
 
 trait SampleCount {
@@ -23,6 +24,7 @@ impl SampleCount for Duration {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum Piece {
     Static(Static),
     Fadeout(Fade),

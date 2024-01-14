@@ -16,7 +16,7 @@ pub fn get_speed(unit: &MeasurementUnit, input: &str) -> anyhow::Result<Speed> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Speed(pub f64);
+pub struct Speed(pub f32);
 
 impl From<ParseFloatError> for InvalidInput {
     fn from(value: ParseFloatError) -> Self {

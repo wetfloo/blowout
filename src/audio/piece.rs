@@ -23,6 +23,7 @@ pub(super) trait WriteAudio {
 /// * `frequency` - is specified in hertz
 /// * `amplitude` - defines how loud this piece is. Values higher than `1.0` lead to distortion
 /// * `duration` - The amount of time the piece will be playing for
+#[derive(Clone, Debug)]
 pub struct Static {
     pub frequency: f32,
     pub amplitude: f32,
@@ -48,7 +49,7 @@ where {
     }
 }
 
-#[derive(Default)]
+#[derive(Clone, Default, Debug)]
 pub struct Fade {
     pub duration: time::Duration,
     pub end_amplitude: f32,

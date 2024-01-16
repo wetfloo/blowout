@@ -12,7 +12,7 @@ pub struct Args {
     pub unit: String,
 
     /// Multiply wind amounts by this frequency
-    #[arg(short, long, default_value_t = 100.0)]
+    #[arg(short = 'q', long, default_value_t = 100.0)]
     pub frequency_multiplier: f32,
 
     /// Duration of every wind sample in the resulting audio file

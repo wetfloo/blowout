@@ -52,7 +52,7 @@ fn main() -> anyhow::Result<()> {
         return Err(NoValues.into());
     }
 
-    let audio_spec = AudioSpec::new(&Path::new("output.wav"));
+    let audio_spec = AudioSpec::new(&Path::new(&args.file_name));
     audio::make_audio(speeds.into_iter(), &audio_spec)?;
 
     Ok(())

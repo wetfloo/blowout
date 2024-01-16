@@ -18,6 +18,10 @@ pub struct Args {
     /// Duration of every wind sample in the resulting audio file
     #[arg(short, long, default_value_t = 10)]
     pub sample_duration_ms: u64,
+
+    /// Output file name
+    #[arg(short = 'f', long, default_value = "output.wav")]
+    pub file_name: String,
 }
 
 #[derive(thiserror::Error, Debug, PartialEq, Eq)]

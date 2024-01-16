@@ -8,21 +8,15 @@ use nom::number::streaming::float;
 use nom::sequence::tuple;
 use nom::{sequence::terminated, IResult};
 
-use crate::unit::MeasurementUnit;
-
-// TODO: figure out how to not take input as a allocated string.
-pub fn get_speed(
-    input: String,
-    MeasurementUnit(unit_string): &MeasurementUnit,
-) -> anyhow::Result<Speed> {
+pub fn get_speed<'a>(input: &'a str, measurement_unit: &'a str) -> IResult<&'a str, Speed> {
     let mut cls = many_till(
         anychar,
-        terminated(float, tuple((space0, tag(unit_string.as_str())))),
+        terminated(float, tuple((space0, tag(measurement_unit)))),
     );
-    let parse_result: IResult<&str, _, ()> = cls(input.as_str());
+    let parse_result: IResult<&str, _> = cls(input);
     let (_, (_, x)) = parse_result?;
 
-    Ok(Speed(x))
+    Ok((input, Speed(x)))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -55,7 +49,6 @@ pub enum InvalidInput {
 #[cfg(test)]
 mod tests {
     use super::{get_speed, Speed};
-    use crate::unit::MeasurementUnit;
 
     const INPUT_STR: &str =
         r#"1             18.2°C 40.7% 4.04          m/s           15.06.2023\11:06:11"#;
@@ -65,8 +58,8 @@ mod tests {
 
     #[test]
     fn test_input_valid() {
-        let unit = MeasurementUnit("m/s".into());
-        let result = get_speed(INPUT_STR.into(), &unit).unwrap();
+        let unit = "m/s";
+        let (_, result) = get_speed(INPUT_STR.into(), unit).unwrap();
 
         assert_eq!(Speed(4.04), result);
     }
@@ -76,16 +69,16 @@ mod tests {
     #[test]
     #[ignore]
     fn test_input_valid_comma() {
-        let unit = MeasurementUnit("m/s".into());
-        let result = get_speed(INPUT_STR_COMMA.into(), &unit).unwrap();
+        let unit = "m/s";
+        let (_, result) = get_speed(INPUT_STR_COMMA.into(), &unit).unwrap();
 
         assert_eq!(Speed(4.04), result);
     }
 
     #[test]
     fn test_input_only() {
-        let unit = MeasurementUnit("m/s".into());
-        let result = get_speed(INPUT_STR_ONLY.into(), &unit).unwrap();
+        let unit = "m/s";
+        let (_, result) = get_speed(INPUT_STR_ONLY.into(), &unit).unwrap();
 
         assert_eq!(Speed(69.0), result);
     }

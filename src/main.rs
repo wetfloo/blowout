@@ -12,9 +12,7 @@ use speed::Speed;
 
 mod audio;
 mod cli;
-mod regex;
 mod speed;
-mod unit;
 
 #[derive(Debug, thiserror::Error)]
 #[error("no valid values found in the file")]
@@ -26,8 +24,7 @@ fn main() -> anyhow::Result<()> {
     let file = File::open(&args.filepath)?;
     let reader = BufReader::new(file);
 
-    let unit = args.unit.try_into()?;
-    let frequency_mulitplier = args.frequency_multiplier;
+    let _frequency_mulitplier = args.frequency_multiplier;
     let duration = Duration::from_millis(args.sample_duration_ms);
 
     let speeds: Vec<_> = reader
@@ -37,8 +34,13 @@ fn main() -> anyhow::Result<()> {
             Err(_) => true,
         })
         .filter_map(|line_res| line_res.ok())
-        .filter_map(|line| speed::get_speed(line, &unit).ok())
-        .map(|Speed(val)| val * frequency_mulitplier)
+        .filter_map(|line| {
+            let speed_res = speed::get_speed(&line, &args.unit);
+            match speed_res {
+                Ok((_, Speed(val))) => Some(val),
+                Err(_) => None,
+            }
+        })
         .map(|freq| {
             Piece::Static(Static {
                 frequency: freq,

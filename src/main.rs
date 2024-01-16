@@ -24,7 +24,6 @@ fn main() -> anyhow::Result<()> {
     let file = File::open(&args.filepath)?;
     let reader = BufReader::new(file);
 
-    let _frequency_mulitplier = args.frequency_multiplier;
     let duration = Duration::from_millis(args.sample_duration_ms);
 
     let speeds: Vec<_> = reader
@@ -43,7 +42,7 @@ fn main() -> anyhow::Result<()> {
         })
         .map(|freq| {
             Piece::Static(Static {
-                frequency: freq,
+                frequency: freq * args.frequency_multiplier,
                 amplitude: args.amplitude,
             })
         })

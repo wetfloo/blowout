@@ -19,6 +19,10 @@ pub struct Args {
     #[arg(short, long, default_value_t = 10)]
     pub sample_duration_ms: u64,
 
+    /// Be careful, values above 1.0 may lead to sound distortion
+    #[arg(long, default_value_t = 1.0)]
+    pub amplitude: f32,
+
     /// Output file name
     #[arg(short = 'f', long, default_value = "output.wav")]
     pub file_name: String,

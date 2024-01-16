@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
         .map(|freq| {
             Piece::Static(Static {
                 frequency: freq,
-                amplitude: 0.9,
+                amplitude: args.amplitude,
             })
         })
         .map(|piece| TemporalPiece(piece, duration))

@@ -9,7 +9,7 @@ pub struct Args {
 
     /// Measurement unit to parse from the input file
     #[arg(short, long, default_value = "m/s")]
-    pub unit: String,
+    pub measurement_unit: String,
 
     /// Multiply wind amounts by this frequency
     #[arg(short = 'q', long, default_value_t = 100.0)]

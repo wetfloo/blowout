@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {
         })
         .filter_map(|line_res| line_res.ok())
         .filter_map(|line| {
-            let speed_res = speed::get_speed(&line, &args.unit);
+            let speed_res = speed::get_speed(&line, &args.measurement_unit);
             match speed_res {
                 Ok((_, Speed(val))) => Some(val),
                 Err(_) => None,

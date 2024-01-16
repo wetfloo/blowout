@@ -8,7 +8,7 @@ pub struct Args {
     pub filepath: PathBuf,
 
     /// Measurement unit to parse from the input file
-    #[arg(short, long, default_value = "m/s")]
+    #[arg(short = 'u', long, default_value = "m/s")]
     pub measurement_unit: String,
 
     /// Multiply wind speeds by this value

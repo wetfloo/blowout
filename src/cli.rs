@@ -11,9 +11,13 @@ pub struct Args {
     #[arg(short, long, default_value = "m/s")]
     pub measurement_unit: String,
 
-    /// Multiply wind amounts by this frequency
-    #[arg(short = 'q', long, default_value_t = 100.0)]
+    /// Multiply wind speeds by this value
+    #[arg(short = 'Q', long, default_value_t = 100.0)]
     pub frequency_multiplier: f32,
+
+    /// Add this frequency to all wind speeds
+    #[arg(short = 'D', long, default_value_t = 0.0)]
+    pub frequency_term: f32,
 
     /// Duration of every wind sample in the resulting audio file
     #[arg(short, long, default_value_t = 10)]

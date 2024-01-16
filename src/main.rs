@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
         })
         .map(|freq| {
             Piece::Static(Static {
-                frequency: freq * args.frequency_multiplier,
+                frequency: freq * args.frequency_multiplier + args.frequency_term,
                 amplitude: args.amplitude,
             })
         })

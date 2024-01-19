@@ -33,6 +33,13 @@ fn main() -> anyhow::Result<()> {
             Err(_) => true,
         })
         .filter_map(|line_res| line_res.ok())
+        .map(|line| {
+            if line.chars().any(|c| c == ',') {
+                line.replace(',', ".")
+            } else {
+                line
+            }
+        })
         .filter_map(|line| {
             let speed_res = speed::get_speed(&line, &args.measurement_unit);
             match speed_res {

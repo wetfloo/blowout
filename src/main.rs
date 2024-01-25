@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use audio::{AudioSpec, Piece, Static, TemporalPiece};
+use audio::{Piece, Spec, Static, TemporalPiece};
 use clap::Parser;
 use cli::Args;
 use speed::Speed;
@@ -32,7 +32,7 @@ fn main() -> anyhow::Result<()> {
             Ok(line_res) => !line_res.trim().is_empty(),
             Err(_) => true,
         })
-        .filter_map(|line_res| line_res.ok())
+        .filter_map(Result::ok)
         .map(|line| {
             if line.chars().any(|c| c == ',') {
                 line.replace(',', ".")
@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
             }
         })
         .filter_map(|line| {
-            let speed_res = speed::get_speed(&line, &args.measurement_unit);
+            let speed_res = speed::get(&line, &args.measurement_unit);
             match speed_res {
                 Ok((_, Speed(val))) => Some(val),
                 Err(_) => None,
@@ -49,7 +49,7 @@ fn main() -> anyhow::Result<()> {
         })
         .map(|freq| {
             Piece::Static(Static {
-                frequency: freq * args.frequency_multiplier + args.frequency_term,
+                frequency: freq.mul_add(args.frequency_multiplier, args.frequency_term),
                 amplitude: args.amplitude,
             })
         })
@@ -60,8 +60,8 @@ fn main() -> anyhow::Result<()> {
         return Err(NoValues.into());
     }
 
-    let audio_spec = AudioSpec::new(&Path::new(&args.file_name));
-    audio::make_audio(speeds.into_iter(), &audio_spec)?;
+    let audio_spec = Spec::new(&Path::new(&args.file_name));
+    audio::make(speeds.into_iter(), &audio_spec)?;
 
     Ok(())
 }

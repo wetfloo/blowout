@@ -16,10 +16,13 @@ trait SampleCount {
 }
 
 impl SampleCount for Duration {
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     fn sample_count(&self, sample_rate: u32) -> u64 {
         let duration_secs = self.as_secs_f64();
-        let unrounded = sample_rate as f64 * duration_secs;
+        let unrounded = f64::from(sample_rate) * duration_secs;
 
+        assert!(unrounded > 0.0);
+        // Should never be negative here.
         unrounded.round() as u64
     }
 }
@@ -30,7 +33,7 @@ pub enum Piece {
     Fadeout(Fade),
 }
 
-pub fn make_audio<Temporals>(temporals: Temporals, spec: &AudioSpec) -> anyhow::Result<()>
+pub fn make<Temporals>(temporals: Temporals, spec: &Spec) -> anyhow::Result<()>
 where
     Temporals: IntoIterator<Item = TemporalPiece>,
 {
@@ -52,13 +55,13 @@ where
     Ok(())
 }
 
-pub struct AudioSpec<'a> {
+pub struct Spec<'a> {
     wav_spec: WavSpec,
     file_path: &'a Path,
 }
 
-impl<'a> AudioSpec<'a> {
-    pub fn new(file_path: &'a Path) -> Self {
+impl<'a> Spec<'a> {
+    pub const fn new(file_path: &'a Path) -> Self {
         let wav_spec = hound::WavSpec {
             bits_per_sample: 32,
             channels: 1,

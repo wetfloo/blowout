@@ -12,68 +12,68 @@ on:
         name: Build and upload
         runs-on: ${{ matrix.os }}
 
-      steps:
-        - name: Clone repository
-          uses: actions/checkout@v4
+        steps:
+          - name: Clone repository
+            uses: actions/checkout@v4
 
-        - name: Install Rust
-          # Or @nightly if you want
-          uses: dtolnay/rust-toolchain@stable
-          # Arguments to pass in
-          with:
-            # Make Rust compile to our target (defined in the matrix)
-            targets: ${{ matrix.target }}
+          - name: Install Rust
+            # Or @nightly if you want
+            uses: dtolnay/rust-toolchain@stable
+            # Arguments to pass in
+            with:
+              # Make Rust compile to our target (defined in the matrix)
+              targets: ${{ matrix.target }}
 
-          strategy:
-            matrix:
-              # You can add more, for any target you'd like!
-              include:
-                - build: linux
-                  os: ubuntu-latest
-                  target: x86_64-unknown-linux-musl
+            strategy:
+              matrix:
+                # You can add more, for any target you'd like!
+                include:
+                  - build: linux
+                    os: ubuntu-latest
+                    target: x86_64-unknown-linux-musl
 
-                - build: macos
-                  os: macos-latest
-                  target: x86_64-apple-darwin
+                  - build: macos
+                    os: macos-latest
+                    target: x86_64-apple-darwin
 
-                - build: windows-gnu
-                  os: windows-latest
-                  target: x86_64-pc-windows-gnu
+                  - build: windows-gnu
+                    os: windows-latest
+                    target: x86_64-pc-windows-gnu
 
-        - name: Get the release version from the tag
-          shell: bash
-          run: echo "VERSION=$\{GITHUB_REF#refs/tags/\}" >> $GITHUB_ENV
+          - name: Get the release version from the tag
+            shell: bash
+            run: echo "VERSION=$\{GITHUB_REF#refs/tags/\}" >> $GITHUB_ENV
 
-        - name: Build
-          uses: actions-rs/cargo@v1
-          with:
-            use-cross: true
-            command: build
-            args: --verbose --release --target $\{\{ matrix.target \}\}
+          - name: Build
+            uses: actions-rs/cargo@v1
+            with:
+              use-cross: true
+              command: build
+              args: --verbose --release --target $\{\{ matrix.target \}\}
 
-        - name: Build archive
-          shell: bash
-          run: |
-            binary_name="blowout"
+          - name: Build archive
+            shell: bash
+            run: |
+              binary_name="blowout"
 
-            dirname="$binary_name-$\{\{ env.VERSION \}\}-$\{\{ matrix.target \}\}"
-            mkdir "$dirname"
-            if [ "$\{\{ matrix.os \}\}" = "windows-latest" ]; then
-              mv "target/$\{\{ matrix.target \}\}/release/$binary_name.exe" "$dirname"
-            else
-              mv "target/$\{\{ matrix.target \}\}/release/$binary_name" "$dirname"
-            fi
+              dirname="$binary_name-$\{\{ env.VERSION \}\}-$\{\{ matrix.target \}\}"
+              mkdir "$dirname"
+              if [ "$\{\{ matrix.os \}\}" = "windows-latest" ]; then
+                mv "target/$\{\{ matrix.target \}\}/release/$binary_name.exe" "$dirname"
+              else
+                mv "target/$\{\{ matrix.target \}\}/release/$binary_name" "$dirname"
+              fi
 
-            if [ "$\{\{ matrix.os \}\}" = "windows-latest" ]; then
-              7z a "$dirname.zip" "$dirname"
-              echo "ASSET=$dirname.zip" >> $GITHUB_ENV
-            else
-              tar -czf "$dirname.tar.gz" "$dirname"
-              echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
-            fi
+              if [ "$\{\{ matrix.os \}\}" = "windows-latest" ]; then
+                7z a "$dirname.zip" "$dirname"
+                echo "ASSET=$dirname.zip" >> $GITHUB_ENV
+              else
+                tar -czf "$dirname.tar.gz" "$dirname"
+                echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
+              fi
 
-        - name: Upload the binaries
-          uses: softprops/action-gh-release@v1
-          with:
-            files: |
-              $\{\{ env.ASSET \}\}
+          - name: Upload the binaries
+            uses: softprops/action-gh-release@v1
+            with:
+              files: |
+                $\{\{ env.ASSET \}\}

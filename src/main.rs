@@ -28,11 +28,7 @@ fn main() -> anyhow::Result<()> {
 
     let speeds: Vec<_> = reader
         .lines()
-        .filter(|line_res| match line_res {
-            Ok(line_res) => !line_res.trim().is_empty(),
-            Err(_) => true,
-        })
-        .filter_map(Result::ok)
+        .filter_map(|line_res| line_res.ok().filter(|v| !v.trim().is_empty()))
         .map(|line| {
             if line.chars().any(|c| c == ',') {
                 line.replace(',', ".")

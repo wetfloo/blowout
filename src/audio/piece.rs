@@ -1,4 +1,4 @@
-use std::f32::consts::PI;
+use std::f64::consts::PI;
 use std::io::{Seek, Write};
 use std::time;
 
@@ -25,8 +25,8 @@ pub(super) trait WriteAudio {
 /// * `duration` - The amount of time the piece will be playing for
 #[derive(Clone, Debug)]
 pub struct Static {
-    pub frequency: f32,
-    pub amplitude: f32,
+    pub frequency: f64,
+    pub amplitude: f64,
 }
 
 impl WriteAudio for Static {
@@ -37,12 +37,12 @@ impl WriteAudio for Static {
         sample_count: u64,
     ) -> anyhow::Result<()>
 where {
-        let coefficient_iter = (0..sample_count).map(|x| x as f32 / sample_rate as f32);
+        let coefficient_iter = (0..sample_count).map(|x| x as f64 / sample_rate as f64);
         for coefficient in coefficient_iter {
             let base_value = (2.0 * PI * coefficient * self.frequency).cos();
             let sample = base_value * self.amplitude;
 
-            writer.write_sample(sample)?;
+            writer.write_sample(sample as f32)?;
         }
 
         Ok(())
@@ -52,8 +52,8 @@ where {
 #[derive(Clone, Default, Debug)]
 pub struct Fade {
     pub duration: time::Duration,
-    pub end_amplitude: f32,
-    pub frequency: f32,
+    pub end_amplitude: f64,
+    pub frequency: f64,
     pub reverse: bool,
 }
 
@@ -65,10 +65,10 @@ impl WriteAudio for Fade {
         sample_count: u64,
     ) -> anyhow::Result<()> {
         let end_amplitude = self.end_amplitude;
-        let fraction = end_amplitude / sample_count as f32;
+        let fraction = end_amplitude / sample_count as f64;
 
         let sample_iter = (0..sample_count)
-            .map(|x| x as f32 * fraction)
+            .map(|x| x as f64 * fraction)
             .map(|part| {
                 if self.reverse {
                     part
@@ -78,13 +78,13 @@ impl WriteAudio for Fade {
             })
             .enumerate()
             .map(|(index, amplitude)| {
-                let coefficient = index as f32 / sample_rate as f32;
+                let coefficient = index as f64 / sample_rate as f64;
                 let base_value = (2.0 * PI * coefficient * self.frequency).cos();
                 base_value * amplitude
             });
 
         for sample in sample_iter {
-            writer.write_sample(sample)?;
+            writer.write_sample(sample as f32)?;
         }
 
         Ok(())

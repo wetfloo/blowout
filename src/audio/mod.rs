@@ -2,7 +2,6 @@ pub mod piece;
 
 use std::{path::Path, time::Duration};
 
-use anyhow;
 use hound::{SampleFormat, WavSpec, WavWriter};
 
 use self::piece::WriteAudio;

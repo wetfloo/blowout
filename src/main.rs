@@ -43,11 +43,11 @@ fn main() -> anyhow::Result<()> {
         .filter_map(|line| {
             let speed_res = speed::get(&line, &args.measurement_unit);
             match speed_res {
-                Ok((_, Speed(val))) => Some(val),
+                Ok((_, Speed(val))) => Some(val.into()),
                 Err(_) => None,
             }
         })
-        .map(|freq| {
+        .map(|freq: f64| {
             Piece::Static(Static {
                 frequency: freq.mul_add(args.frequency_multiplier, args.frequency_term),
                 amplitude: args.amplitude,
@@ -60,7 +60,7 @@ fn main() -> anyhow::Result<()> {
         return Err(NoValues.into());
     }
 
-    let audio_spec = Spec::new(&Path::new(&args.file_name));
+    let audio_spec = Spec::new(Path::new(&args.file_name));
     audio::make(speeds.into_iter(), &audio_spec)?;
 
     Ok(())

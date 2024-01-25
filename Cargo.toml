@@ -12,6 +12,9 @@ hound = "3.5.1"
 nom = "7.1.3"
 thiserror = "1.0.50"
 
+[profile.release]
+strip = true
+
 [lints.clippy]
 enum_glob_use = "deny"
 pedantic = "deny"

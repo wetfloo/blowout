@@ -10,74 +10,72 @@ permissions:
   contents: write
 
 jobs:
-  build-and-upload:
-    name: Build and upload
-    runs-on: ${{ matrix.os }}
-
+  release:
     strategy:
       matrix:
-        include:
-          - build: x86_64-linux
+        platform:
+          - release_for: Linux-x86_64
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
+            command: both
 
-          - build: aarch64-linux
+          - release_for: Linux-aarch64
             os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
+            command: both
 
-          - build: x86_64-macos
+          - release_for: macOS-x86_64
             os: macos-latest
             target: x86_64-apple-darwin
+            command: build
 
-          - build: aarch64-macos 
+          - release_for: macOS-aarch64
             os: macos-latest
             target: aarch64-apple-darwin
+            command: build
 
-          - build: windows-gnu
+          - release_for: Windows-x86_64
             os: windows-latest
-            target: x86_64-pc-windows-gnu
+            target: x86_64-pc-windows-msvc
+            command: build
 
-          - build: win32-msvc
-            os: windows-2019
-            rust: stable
+          - release_for: Windows-x86
+            os: windows-latest
             target: i686-pc-windows-msvc
+            command: build
+
+    runs-on: ${{ matrix.platform.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v0
+
+        with:
+          command: ${{ matrix.platform.command }}
+          target: ${{ matrix.platform.target }}
+          args: "--locked --release"
+          strip: true
 
       - name: Get the release version from the tag
         shell: bash
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Install Rust
-        # Or @nightly if you want
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --verbose --release --target ${{ matrix.target }}
-
       - name: Build archive
         shell: bash
         run: |
-          # Replace with the name of your binary
           binary_name="blowout"
 
-          dirname="$binary_name-${{ env.VERSION }}-${{ matrix.target }}"
+          dirname="$binary_name-${{ env.VERSION }}-${{ matrix.platform.target }}"
           mkdir "$dirname"
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            mv "target/${{ matrix.target }}/release/$binary_name.exe" "$dirname"
+          if [ "${{ matrix.platform.os }}" = "windows-latest" ]; then
+            mv "target/${{ matrix.platform.target }}/release/$binary_name.exe" "$dirname"
           else
-            mv "target/${{ matrix.target }}/release/$binary_name" "$dirname"
+            mv "target/${{ matrix.platform.target }}/release/$binary_name" "$dirname"
           fi
 
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          if [ "${{ matrix.platform.os }}" = "windows-latest" ]; then
             7z a "$dirname.zip" "$dirname"
             echo "ASSET=$dirname.zip" >> $GITHUB_ENV
           else

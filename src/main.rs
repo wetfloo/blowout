@@ -44,12 +44,14 @@ fn main() -> anyhow::Result<()> {
             }
         })
         .map(|freq: f64| {
-            Piece::Static(Static {
-                frequency: freq.mul_add(args.frequency_multiplier, args.frequency_term),
-                amplitude: args.amplitude,
-            })
+            TemporalPiece(
+                Piece::Static(Static {
+                    frequency: freq.mul_add(args.frequency_multiplier, args.frequency_term),
+                    amplitude: args.amplitude,
+                }),
+                duration,
+            )
         })
-        .map(|piece| TemporalPiece(piece, duration))
         .collect();
 
     if speeds.is_empty() {

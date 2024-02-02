@@ -37,7 +37,7 @@ impl WriteAudio for Static {
         sample_count: u64,
     ) -> anyhow::Result<()>
 where {
-        let coefficient_iter = (0..sample_count).map(|x| x as f64 / sample_rate as f64);
+        let coefficient_iter = (0..sample_count).map(|x| x as f64 / f64::from(sample_rate));
         for coefficient in coefficient_iter {
             let base_value = (2.0 * PI * coefficient * self.frequency).cos();
             let sample = base_value * self.amplitude;
@@ -78,7 +78,7 @@ impl WriteAudio for Fade {
             })
             .enumerate()
             .map(|(index, amplitude)| {
-                let coefficient = index as f64 / sample_rate as f64;
+                let coefficient = index as f64 / f64::from(sample_rate);
                 let base_value = (2.0 * PI * coefficient * self.frequency).cos();
                 base_value * amplitude
             });
